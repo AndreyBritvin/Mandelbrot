@@ -33,8 +33,10 @@ int init_sdl(color_setter_t set_pixels_color)
     bool running = true;
     SDL_Event event = {};
     while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_QUIT)
+            {
                 running = false;
             }
         }

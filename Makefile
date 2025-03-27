@@ -25,3 +25,6 @@ clean:
 	mkdir build
 	rm mandelbrot.out
 
+count_time:
+	time ./mandelbrot --type=$(TYPE) --count=$(COUNT)
+
