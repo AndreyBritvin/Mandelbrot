@@ -26,6 +26,10 @@ int init_sdl(color_setter_t set_pixels_color)
     void*   pixels      = NULL;
     int     pitch       = 0;
 
+    SDL_LockTexture(texture, NULL, &pixels, &pitch);
+    set_pixels_color((int*) pixels);
+    SDL_UnlockTexture(texture);
+
     bool running = true;
     SDL_Event event = {};
     while (running) {
@@ -34,12 +38,6 @@ int init_sdl(color_setter_t set_pixels_color)
                 running = false;
             }
         }
-
-
-        SDL_LockTexture(texture, NULL, &pixels, &pitch);
-        set_pixels_color((int*) pixels);
-        SDL_UnlockTexture(texture);
-
 
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, NULL, NULL);
