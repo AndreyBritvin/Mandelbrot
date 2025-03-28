@@ -19,19 +19,20 @@ int generatePixelColor(int N)
     return (r << 24) | (g << 16) | (b << 8) | 255;  // Формат RGBA
 }
 
-err_code_t fill_pixels_SISD(int* pixels)    // single instruction single data
+err_code_t fill_pixels_SISD(int* pixels, double x_center, double y_center, double scale)    // single instruction single data
 {
     assert(pixels);
 
     double dx = (double) 1/800;
     double dy = (double) 1/600;
     double R_square_max = 10;
-    for (int y_screen = 0; y_screen < 600; y_screen++)
-    {
-        double X0 = -400.f * dx;
-        double Y0 = -300.f * dy + dy * y_screen;
+    double Y0 = y_center * dy - scale * 600 / 2 * dy;
 
-        for (int x_screen = 0; x_screen < 800; x_screen++, X0 += dx)
+    for (int y_screen = 0; y_screen < 600; y_screen++, Y0 += dy * scale)
+    {
+        double X0 = x_center * dx - scale * dx * 800 / 2;
+
+        for (int x_screen = 0; x_screen < 800; x_screen++, X0 += dx * scale)
         {
             double X = X0;
             double Y = Y0;

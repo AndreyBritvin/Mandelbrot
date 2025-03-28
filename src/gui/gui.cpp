@@ -26,20 +26,81 @@ int init_sdl(color_setter_t set_pixels_color)
     void*   pixels      = NULL;
     int     pitch       = 0;
 
-    SDL_LockTexture(texture, NULL, &pixels, &pitch);
-    set_pixels_color((int*) pixels);
-    SDL_UnlockTexture(texture);
-
     bool running = true;
     SDL_Event event = {};
-    while (running) {
+
+    double scale = 1.0;
+    double X_center = 0;
+    double Y_center = 0;
+
+    while (running)
+    {
         while (SDL_PollEvent(&event))
         {
-            if (event.type == SDL_QUIT)
-            {
-                running = false;
+            switch (event.type)
+                {
+                case SDL_QUIT:
+                {
+                    running = false;
+                    break;
+                }
+                case SDL_KEYDOWN:
+                {
+                    printf("Scancode: 0x%02X\n", event.key.keysym.scancode);
+                    switch (event.key.keysym.scancode)
+                    {
+                        case 0x2E: // +
+                        {
+                            scale *= 0.9;
+                            // X_center *= (double) 1 / 0.9;
+                            // Y_center *= (double) 1 / 0.9;
+                            break;
+                        }
+                        case 0x2D: // -
+                        {
+                            scale *= (double) 1 / 0.9;
+                            // X_center *= 0.9;
+                            // Y_center *= 0.9;
+                            break;
+                        }
+                        case 0x52: // up
+                        {
+                            Y_center -= movement_speed * scale;
+                            break;
+                        }
+                        case 0x51: // down
+                        {
+                            Y_center += movement_speed * scale;
+                            break;
+                        }
+
+                        case 0x4F: // right
+                        {
+                            X_center += movement_speed * scale;
+                            break;
+                        }
+                        case 0x50: // left
+                        {
+                            X_center -= movement_speed * scale;
+                            break;
+                        }
+                        default:
+                        {
+                            break;
+                        }
+                    }
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
             }
         }
+
+        SDL_LockTexture(texture, NULL, &pixels, &pitch);
+        set_pixels_color((int*) pixels, X_center, Y_center, scale);
+        SDL_UnlockTexture(texture);
 
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, NULL, NULL);
