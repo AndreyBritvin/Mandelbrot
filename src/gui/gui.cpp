@@ -6,10 +6,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "gui.h"
+#include "config.h"
 #include "utils.h"
-
-const int WIDTH = 800;
-const int HEIGHT = 600;
 
 int init_sdl(color_setter_t set_pixels_color)
 {
@@ -29,7 +27,7 @@ int init_sdl(color_setter_t set_pixels_color)
     bool running = true;
     SDL_Event event = {};
 
-    double scale = 1.0;
+    double scale = default_scale;
     double X_center = 0;
     double Y_center = 0;
 
@@ -49,37 +47,37 @@ int init_sdl(color_setter_t set_pixels_color)
                     printf("Scancode: 0x%02X\n", event.key.keysym.scancode);
                     switch (event.key.keysym.scancode)
                     {
-                        case 0x2E: // +
+                        case SDL_SCANCODE_EQUALS: // +
                         {
                             scale *= 0.9;
                             // X_center *= (double) 1 / 0.9;
                             // Y_center *= (double) 1 / 0.9;
                             break;
                         }
-                        case 0x2D: // -
+                        case SDL_SCANCODE_MINUS: // -
                         {
                             scale *= (double) 1 / 0.9;
                             // X_center *= 0.9;
                             // Y_center *= 0.9;
                             break;
                         }
-                        case 0x52: // up
+                        case SDL_SCANCODE_UP: // up
                         {
                             Y_center -= movement_speed * scale;
                             break;
                         }
-                        case 0x51: // down
+                        case SDL_SCANCODE_DOWN: // down
                         {
                             Y_center += movement_speed * scale;
                             break;
                         }
 
-                        case 0x4F: // right
+                        case SDL_SCANCODE_RIGHT: // right
                         {
                             X_center += movement_speed * scale;
                             break;
                         }
-                        case 0x50: // left
+                        case SDL_SCANCODE_LEFT: // left
                         {
                             X_center -= movement_speed * scale;
                             break;

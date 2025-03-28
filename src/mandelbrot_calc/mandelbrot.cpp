@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "stdio.h"
 #include "assert.h"
+#include "config.h"
 
 // TODO: make constant for black color
 // Make
@@ -10,7 +11,7 @@ int generatePixelColor(int N)
 {
     if (N == 255)
     {
-        return 0 | 255; // black
+        return BLACK_COLOR_RGBA; // black
     }
     // if (N>250) printf("N = %d\n", N);
     short r = (N * 100) % 255;
@@ -23,22 +24,22 @@ err_code_t fill_pixels_SISD(int* pixels, double x_center, double y_center, doubl
 {
     assert(pixels);
 
-    double dx = (double) 1/800;
-    double dy = (double) 1/600;
     double R_square_max = 10;
-    double Y0 = y_center * dy - scale * 600 / 2 * dy;
+    double dx = (double) 1 / WIDTH * scale;
+    double dy = (double) 1 / WIDTH * scale;
+    double Y0 = y_center / HEIGHT - scale / 2;
 
-    for (int y_screen = 0; y_screen < 600; y_screen++, Y0 += dy * scale)
+    for (int y_screen = 0; y_screen < HEIGHT; y_screen++, Y0 += dy)
     {
-        double X0 = x_center * dx - scale * dx * 800 / 2;
+        double X0 = x_center / WIDTH - scale / 2;
 
-        for (int x_screen = 0; x_screen < 800; x_screen++, X0 += dx * scale)
+        for (int x_screen = 0; x_screen < WIDTH; x_screen++, X0 += dx)
         {
             double X = X0;
             double Y = Y0;
             int N_count = 0;
 
-            for (; N_count < 255; N_count++)
+            for (; N_count < N_EXIT_COUNT; N_count++)
             {
                 double X_square = X * X;
                 double Y_square = Y * Y;
@@ -52,7 +53,7 @@ err_code_t fill_pixels_SISD(int* pixels, double x_center, double y_center, doubl
                 Y = 2 * XY              + Y0;
             }
 
-            if (N_count > 255)
+            if (N_count > N_EXIT_COUNT)
             {
             printf( "-------begin-------\n"
                 "x_screen = %d\n"
@@ -67,7 +68,7 @@ err_code_t fill_pixels_SISD(int* pixels, double x_center, double y_center, doubl
                 x_screen, y_screen, dx, X0, Y0, X, Y, N_count);
             }
 
-            pixels[y_screen * 800 + x_screen] = generatePixelColor(N_count);
+            pixels[y_screen * WIDTH + x_screen] = generatePixelColor(N_count);
         }
     }
     printf("Finished calc\n");
