@@ -144,14 +144,14 @@ err_code_t fill_pixels_SIMD(int* pixels, double x_center, double y_center, doubl
     __m256d Y0 = _mm256_set1_pd(y_center / HEIGHT - scale / 2);
     alignas(32) long long int N_counts_total[4] = {}; // alignas - 32 bytes aligning for _mm256_store_si256
 
-    for (int y_screen = 0; y_screen < HEIGHT; y_screen++, Y0 += dy)
+    for (int y_screen = 0; y_screen < HEIGHT; y_screen++, Y0 = _mm256_add_pd(Y0, _mm256_set1_pd(dy)))
     {
         double X0_initial = x_center / WIDTH - scale / 2;
 
         for (int x_screen = 0; x_screen < WIDTH; x_screen += 4, X0_initial += dx * 4)
         {
             __m256d X0 = _mm256_add_pd(_mm256_set1_pd(X0_initial),
-                                       _mm256_mul_pd (_mm256_set1_pd(dx), _mm256_set_pd(0, 1, 2, 3)));
+                                       _mm256_mul_pd (_mm256_set1_pd(dx), _mm256_set_pd(3, 2, 1, 0)));
             __m256d X = X0;
             __m256d Y = Y0;
             __m256i N_counts = _mm256_setzero_si256();
@@ -169,8 +169,8 @@ err_code_t fill_pixels_SIMD(int* pixels, double x_center, double y_center, doubl
                 {
                     break;
                 }
-                N_counts = _mm256_add_epi64 (N_counts, _mm256_castpd_si256(cmp));
-                X = _mm256_add_pd(_mm256_sub_pd(X, Y),   X0);
+                N_counts = _mm256_sub_epi64(N_counts, _mm256_castpd_si256(cmp)); // sub because cmp_pd returns 0xFFFF... on true, which is equal to -1
+                X = _mm256_add_pd(_mm256_sub_pd(X_square, Y_square),   X0);
                 Y = _mm256_add_pd(_mm256_add_pd(XY, XY), Y0);
             }
             _mm256_store_si256((__m256i *)&N_counts_total, N_counts);
