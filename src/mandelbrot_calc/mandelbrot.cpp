@@ -185,17 +185,14 @@ err_code_t fill_pixels_SIMD(int* pixels, double x_center, double y_center, doubl
 err_code_t fill_pixels_SIMD_multithread(int* pixels, double x_center, double y_center, double scale)    // single instruction multiple data
 {
     assert(pixels);
-    #pragma omp parallel
-{
-
+    #pragma omp parallel for
+    for (int y_screen = 0; y_screen < HEIGHT; y_screen++)
+    {
     double R_square_max = 10;
     double dx = (double) 1 / WIDTH * scale;
     double dy = (double) 1 / WIDTH * scale;
-    __m256d Y0 = _mm256_set1_pd(y_center / HEIGHT - scale / 2);
+    __m256d Y0 = _mm256_set1_pd(y_center / HEIGHT - scale / 2 + dy * y_screen);
     alignas(32) long long int N_counts_total[4] = {}; // alignas - 32 bytes aligning for _mm256_store_si256
-
-    for (int y_screen = 0; y_screen < HEIGHT; y_screen++)
-    {
         double X0_initial = x_center / WIDTH - scale / 2;
 
         for (int x_screen = 0; x_screen < WIDTH; x_screen += 4, X0_initial += dx * 4)
@@ -230,9 +227,9 @@ err_code_t fill_pixels_SIMD_multithread(int* pixels, double x_center, double y_c
             }
         }
 
-        Y0 = _mm256_add_pd(Y0, _mm256_set1_pd(dy));
+        // Y0 = _mm256_add_pd(Y0, _mm256_set1_pd(dy));
     }
-    }
+
     // #pragma omp barrier
 
     printf("Finished calc, %d\n", omp_get_max_threads());
