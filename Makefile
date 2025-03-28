@@ -12,7 +12,7 @@ MY_LIBS = My_logging_system/log_lib.a
 all: mandelbrot.out
 
 mandelbrot.out:$(SRC_FILES) $(BUILD_FILES)
-	@$(CC) $(CFLAGS) $(INCLUDE) $(SRC_FILES) $(MY_LIBS) -O3 -o mandelbrot.out -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_mixer
+	@$(CC) $(CFLAGS) $(INCLUDE) $(SRC_FILES) $(MY_LIBS) -O3 -mavx2 -o mandelbrot.out -lSDL2 -lSDL2_ttf -lSDL2_image -lSDL2_mixer
 
 library:
 	@$(CC) $(CFLAGS) -c $(INCLUDE) $(SRC_FILES) My_logging_system/log_lib.a -o $(BUILD_FILES)

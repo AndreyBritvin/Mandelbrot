@@ -6,7 +6,7 @@ int main()
 {
     // TODO: make arguments parsing
 
-    init_sdl(fill_pixels_SIMD_manual);
+    init_sdl(fill_pixels_SIMD);
 
     return 0;
 }
