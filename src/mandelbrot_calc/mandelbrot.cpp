@@ -5,10 +5,7 @@
 #include "config.h"
 #include <immintrin.h>
 #include <xmmintrin.h>
-
-
-// TODO: make constant for black color
-// Make
+#include <omp.h>
 
 int generatePixelColor(long long int N)
 {
@@ -174,11 +171,71 @@ err_code_t fill_pixels_SIMD(int* pixels, double x_center, double y_center, doubl
                 Y = _mm256_add_pd(_mm256_add_pd(XY, XY), Y0);
             }
             _mm256_store_si256((__m256i *)&N_counts_total, N_counts);
-            for (int i = 0; i < 4; i++) {printf("i = %d N_counts = %lld\n", i, N_counts_total[i]); pixels[y_screen * WIDTH + x_screen + i] = generatePixelColor(N_counts_total[i]);}
+            for (int i = 0; i < 4; i++) {pixels[y_screen * WIDTH + x_screen + i] = generatePixelColor(N_counts_total[i]);}
         }
     }
 
     printf("Finished calc\n");
+
+    return OK;
+}
+
+
+// Real avx
+err_code_t fill_pixels_SIMD_multithread(int* pixels, double x_center, double y_center, double scale)    // single instruction multiple data
+{
+    assert(pixels);
+    #pragma omp parallel
+{
+
+    double R_square_max = 10;
+    double dx = (double) 1 / WIDTH * scale;
+    double dy = (double) 1 / WIDTH * scale;
+    __m256d Y0 = _mm256_set1_pd(y_center / HEIGHT - scale / 2);
+    alignas(32) long long int N_counts_total[4] = {}; // alignas - 32 bytes aligning for _mm256_store_si256
+
+    for (int y_screen = 0; y_screen < HEIGHT; y_screen++)
+    {
+        double X0_initial = x_center / WIDTH - scale / 2;
+
+        for (int x_screen = 0; x_screen < WIDTH; x_screen += 4, X0_initial += dx * 4)
+        {
+            __m256d X0 = _mm256_add_pd(_mm256_set1_pd(X0_initial),
+                                       _mm256_mul_pd (_mm256_set1_pd(dx), _mm256_set_pd(3, 2, 1, 0)));
+            __m256d X = X0;
+            __m256d Y = Y0;
+            __m256i N_counts = _mm256_setzero_si256();
+            int N_count = 0;
+
+            for (; N_count < N_EXIT_COUNT; N_count++)
+            {
+                __m256d X_square = _mm256_mul_pd(X, X);
+                __m256d Y_square = _mm256_mul_pd(Y, Y);
+                __m256d XY       = _mm256_mul_pd(X, Y);
+                __m256d R_square = _mm256_add_pd(X_square, Y_square);
+                __m256d cmp      = _mm256_cmp_pd(R_square, _mm256_set1_pd(R_square_max), _CMP_LE_OQ);
+                long long int mask = _mm256_movemask_pd(cmp);
+                if (!mask)
+                {
+                    break;
+                }
+                N_counts = _mm256_sub_epi64(N_counts, _mm256_castpd_si256(cmp)); // sub because cmp_pd returns 0xFFFF... on true, which is equal to -1
+                X = _mm256_add_pd(_mm256_sub_pd(X_square, Y_square),   X0);
+                Y = _mm256_add_pd(_mm256_add_pd(XY, XY), Y0);
+            }
+            _mm256_store_si256((__m256i *)&N_counts_total, N_counts);
+            // #pragma omp critical
+            {
+            for (int i = 0; i < 4; i++) {pixels[y_screen * WIDTH + x_screen + i] = generatePixelColor(N_counts_total[i]);}
+            }
+        }
+
+        Y0 = _mm256_add_pd(Y0, _mm256_set1_pd(dy));
+    }
+    }
+    // #pragma omp barrier
+
+    printf("Finished calc, %d\n", omp_get_max_threads());
 
     return OK;
 }
