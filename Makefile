@@ -18,7 +18,7 @@ library:
 	@$(CC) $(CFLAGS) -c $(INCLUDE) $(SRC_FILES) My_logging_system/log_lib.a -o $(BUILD_FILES)
 
 run:
-	./mandelbrot.out
+	./mandelbrot.out --mode=graphic
 
 clean:
 	rm -rf build
@@ -26,5 +26,5 @@ clean:
 	rm mandelbrot.out
 
 count_time:
-	time ./mandelbrot --type=$(TYPE) --count=$(COUNT)
+	time -p -q ./mandelbrot.out --mode=test --func=SIMDT_CPU --test_count=1000
 
