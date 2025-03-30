@@ -129,7 +129,7 @@ err_code_t fill_pixels_SIMD_manual(int* pixels, double x_center, double y_center
 
     return OK;
 }
-
+/* 
 // Real avx
 err_code_t fill_pixels_SIMD(int* pixels, double x_center, double y_center, double scale)    // single instruction multiple data
 {
@@ -236,3 +236,4 @@ err_code_t fill_pixels_SIMD_multithread(int* pixels, double x_center, double y_c
 
     return OK;
 }
+*/

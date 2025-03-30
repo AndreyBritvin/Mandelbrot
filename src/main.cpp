@@ -23,8 +23,10 @@ int main(int argc, char *argv[])
     int option_index = 0;
     int c            = 0;
 
-    while ((c = getopt_long(argc, argv, "m:f:t:", long_options, &option_index)) != -1) {
-        switch (c) {
+    while ((c = getopt_long(argc, argv, "m:f:t:", long_options, &option_index)) != -1)
+    {
+        switch (c)
+        {
             case 'm':
                 mode = optarg;
                 break;
@@ -48,7 +50,7 @@ int main(int argc, char *argv[])
 
     if (strcmp(mode, "graphic") == 0)
     {
-        init_sdl(fill_pixels_SIMD_multithread);
+        init_sdl(fill_pixels_SIMD_manual);
     }
     else if (strcmp(mode, "test") == 0)
     {
@@ -59,7 +61,7 @@ int main(int argc, char *argv[])
         }
 
         color_setter_t test_func = NULL;
-
+        // TODO: make for to loop all instructions and finc_names
         if (strcmp(func_name, "SISD") == 0)
         {
             test_func = fill_pixels_SISD;
@@ -68,14 +70,14 @@ int main(int argc, char *argv[])
         {
             test_func = fill_pixels_SIMD_manual;
         }
-        else if (strcmp(func_name, "SIMD") == 0)
-        {
-            test_func = fill_pixels_SIMD;
-        }
-        else if (strcmp(func_name, "SIMDT_CPU") == 0)
-        {
-            test_func = fill_pixels_SIMD_multithread;
-        }
+        // else if (strcmp(func_name, "SIMD") == 0)
+        // {
+        //     test_func = fill_pixels_SIMD;
+        // }
+        // else if (strcmp(func_name, "SIMDT_CPU") == 0)
+        // {
+        //     test_func = fill_pixels_SIMD_multithread;
+        // }
         else
         {
             PRINT_ERROR("Unknown function name: %s\n", func_name);
