@@ -20,7 +20,7 @@ int generatePixelColor(long long int N)
     return (r << 24) | (g << 16) | (b << 8) | 255;  // Формат RGBA
 }
 
-err_code_t fill_pixels_SISD(int* pixels, double x_center, double y_center, double scale)    // single instruction single data
+void fill_pixels_SISD(int* pixels, double x_center, double y_center, double scale)    // single instruction single data
 {
     assert(pixels);
 
@@ -73,11 +73,11 @@ err_code_t fill_pixels_SISD(int* pixels, double x_center, double y_center, doubl
     }
     printf("Finished calc\n");
 
-    return OK;
+    return ;
 }
 
 // Custom avx
-err_code_t fill_pixels_SIMD_manual(int* pixels, double x_center, double y_center, double scale)    // single instruction multiple data
+void fill_pixels_SIMD_manual(int* pixels, double x_center, double y_center, double scale)    // single instruction multiple data
 {
     assert(pixels);
 
@@ -127,11 +127,11 @@ err_code_t fill_pixels_SIMD_manual(int* pixels, double x_center, double y_center
     }
     printf("Finished calc\n");
 
-    return OK;
+    return ;
 }
 /* 
 // Real avx
-err_code_t fill_pixels_SIMD(int* pixels, double x_center, double y_center, double scale)    // single instruction multiple data
+void fill_pixels_SIMD(int* pixels, double x_center, double y_center, double scale)    // single instruction multiple data
 {
     assert(pixels);
 
@@ -182,7 +182,7 @@ err_code_t fill_pixels_SIMD(int* pixels, double x_center, double y_center, doubl
 
 
 // Real avx
-err_code_t fill_pixels_SIMD_multithread(int* pixels, double x_center, double y_center, double scale)    // single instruction multiple data
+void fill_pixels_SIMD_multithread(int* pixels, double x_center, double y_center, double scale)    // single instruction multiple data
 {
     assert(pixels);
     #pragma omp parallel for

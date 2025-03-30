@@ -8,8 +8,11 @@
 
 #define PRINT_ERROR(...) fprintf(stderr, __VA_ARGS__)
 
+extern "C" void fill_pixels_SIMT_GPU(int* pixels, double x_center, double y_center, double scale);
+
+
 int main(int argc, char *argv[])
-{
+{/*
     static struct option long_options[] = {
         {"mode",        required_argument, 0, 'm'},
         {"func",        required_argument, 0, 'f'},
@@ -61,6 +64,7 @@ int main(int argc, char *argv[])
         }
 
         color_setter_t test_func = NULL;
+        bool is_GPU = false;
         // TODO: make for to loop all instructions and finc_names
         if (strcmp(func_name, "SISD") == 0)
         {
@@ -78,6 +82,10 @@ int main(int argc, char *argv[])
         // {
         //     test_func = fill_pixels_SIMD_multithread;
         // }
+        else if (strcmp(func_name, "SIMT_GPU") == 0)
+        {
+            is_GPU = true;
+        }
         else
         {
             PRINT_ERROR("Unknown function name: %s\n", func_name);
@@ -87,16 +95,17 @@ int main(int argc, char *argv[])
         int* pixels = (int *) calloc(WIDTH * HEIGHT, sizeof(int));
         for (int i = 0; i < test_count; i++)
         {
-            test_func(pixels, 0, 0, default_scale);
+            if (is_GPU)     fill_pixels_SIMT_GPU(pixels, 0, 0, default_scale);
+            else            test_func       (pixels, 0, 0, default_scale);
         }
     }
     else
     {
         PRINT_ERROR("Invalid mode: %s\n", mode);
         return EXIT_FAILURE;
-    }
+    }*/
 
-    // init_sdl(fill_pixels_SIMD_multithread);
+    init_sdl(fill_pixels_SIMT_GPU);
 
     return EXIT_SUCCESS;
 }
