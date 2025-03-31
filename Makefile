@@ -42,7 +42,6 @@ INCLUDE = -Iinclude -Iinclude/gui -Iinclude/mandelbrot_calc -IMy_logging_system/
           -I"C:/Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/ucrt" \
           -I"C:/Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/shared" \
           -I"C:/Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um" \
-		  -I"C:\Users\andrey\gcc\x86_64-w64-mingw32\include"
 
 # Пути к библиотекам
 LIBPATHS = /LIBPATH:"C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.43.34808/lib/x64" \
@@ -59,7 +58,7 @@ LIBS =   SDL2.lib SDL2main.lib  "C:/Program Files/NVIDIA GPU Computing Toolkit/C
 
 
 # Флаги компиляции
-CFLAGS = /O2 /D_DEBUG /D_EJUDGE_CLIENT_SIDE /W3 /EHsc /MT
+CFLAGS = /O2 /D_DEBUG /D_EJUDGE_CLIENT_SIDE /W3 /EHsc /MT /GL
 
 # Исходные файлы
 SRC_FILES = $(wildcard src/*.cpp) $(wildcard src/gui/*.cpp) $(wildcard src/mandelbrot_calc/*.cpp)
@@ -74,7 +73,7 @@ all: mandelbrot.exe
 
 # Компиляция с использованием nvcc для .cu файлов
 mandelbrot_cu.obj: src/mandelbrot_calc/mandelbrot.cu
-	nvcc -c src/mandelbrot_calc/mandelbrot.cu -o mandelbrot_cu.obj -arch=sm_86 $(INCLUDE)
+	nvcc -c src/mandelbrot_calc/mandelbrot.cu -o mandelbrot_cu.obj -arch=sm_86 $(INCLUDE) -O3 
 
 # Линковка отдельно через link.exe
 mandelbrot.exe: $(OBJ_FILES) mandelbrot_cu.obj
@@ -92,5 +91,5 @@ clean:
 	rm mandelbrot.exe
 
 count_time:
-	time -p -q ./mandelbrot.exe --mode=test --func=SIMDT_CPU --test_count=1000
+	./mandelbrot.exe --mode=test --func=SIMDT_CPU --test_count=1000
 

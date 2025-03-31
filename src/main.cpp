@@ -12,7 +12,7 @@ extern "C" void fill_pixels_SIMT_GPU(int* pixels, double x_center, double y_cent
 
 
 int main(int argc, char *argv[])
-{/*
+{
     static struct option long_options[] = {
         {"mode",        required_argument, 0, 'm'},
         {"func",        required_argument, 0, 'f'},
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 
     if (strcmp(mode, "graphic") == 0)
     {
-        init_sdl(fill_pixels_SIMD_manual);
+        init_sdl(fill_pixels_SIMT_GPU);
     }
     else if (strcmp(mode, "test") == 0)
     {
@@ -103,9 +103,9 @@ int main(int argc, char *argv[])
     {
         PRINT_ERROR("Invalid mode: %s\n", mode);
         return EXIT_FAILURE;
-    }*/
+    }
 
-    init_sdl(fill_pixels_SIMT_GPU);
+    // init_sdl(fill_pixels_SIMT_GPU);
 
     return EXIT_SUCCESS;
 }

@@ -86,7 +86,8 @@ __global__ void mandelbrot_kernel(int* pixels, double x_center, double y_center,
     double x0 = x_center / WIDTH  - scale / 2 + dx * idx;
 
     int N_count = 0;
-    double X = x0, Y = y0;
+    double X = x0, 
+           Y = y0;
     double R_square_max = 10;
 
     while (N_count < N_EXIT_COUNT) 
@@ -125,7 +126,7 @@ __global__ void mandelbrot_kernel(int* pixels, double x_center, double y_center,
 extern "C"
 __host__ void fill_pixels_SIMT_GPU(int* pixels, double x_center, double y_center, double scale) 
 {
-    int *d_pixels;
+    int *d_pixels = NULL;
     size_t size = WIDTH * HEIGHT * sizeof(int);
     
     // Выделение памяти на устройстве
@@ -135,7 +136,7 @@ __host__ void fill_pixels_SIMT_GPU(int* pixels, double x_center, double y_center
         printf("CUDA malloc failed: %s\n", cudaGetErrorString(err));
     }
     // printf("CUDA malloc success: %s\n", cudaGetErrorString(err));
-
+ 
     // Запуск ядра
     dim3 blockDim(32, 32);  // Размер блока
     dim3 gridDim((WIDTH + blockDim.x - 1) / blockDim.x, (HEIGHT + blockDim.y - 1) / blockDim.y);  // Размер сетки

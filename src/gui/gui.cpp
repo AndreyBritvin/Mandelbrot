@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "gui.h"
 #include "config.h"
+#include <windows.h>  // Для QueryPerformanceCounter()
 #include "utils.h"
 
 int init_sdl(color_setter_t set_pixels_color)
@@ -27,6 +28,16 @@ int init_sdl(color_setter_t set_pixels_color)
     double scale = default_scale;
     double X_center = 0;
     double Y_center = 0;
+    // struct timespec start = {}, now = {};
+    
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER now;
+    QueryPerformanceFrequency(&frequency); // Получаем частоту таймера (обычно 10M+)
+    QueryPerformanceCounter(&start);       // Засекаем старт    int frames = 0;
+    double fps = 0.0;
+    int frames = 0;
+
 
     while (running)
     {
@@ -96,6 +107,18 @@ int init_sdl(color_setter_t set_pixels_color)
         SDL_LockTexture(texture, NULL, &pixels, &pitch);
         set_pixels_color((int*) pixels, X_center, Y_center, scale);
         SDL_UnlockTexture(texture);
+
+        frames++;
+        QueryPerformanceCounter(&now);
+        double elapsed_time = (double)(now.QuadPart - start.QuadPart) / frequency.QuadPart;
+
+        if (elapsed_time >= 1.0) {
+            fps = frames / elapsed_time;
+            printf("FPS: %.2f\n", fps);
+
+            frames = 0;
+            QueryPerformanceCounter(&start); // Сброс таймера
+        }
 
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, NULL, NULL);
