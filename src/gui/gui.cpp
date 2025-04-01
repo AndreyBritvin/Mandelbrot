@@ -1,10 +1,15 @@
-#include <SDL.h>
+#ifdef _WIN32
+    #include <SDL.h>
+    #include <windows.h>  // Для QueryPerformanceCounter()
+#else
+    #include <SDL2/SDL.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "gui.h"
 #include "config.h"
-#include <windows.h>  // Для QueryPerformanceCounter()
 #include "utils.h"
 
 int init_sdl(color_setter_t set_pixels_color)
@@ -29,7 +34,8 @@ int init_sdl(color_setter_t set_pixels_color)
     double X_center = 0;
     double Y_center = 0;
     // struct timespec start = {}, now = {};
-    
+
+#ifdef _WIN32
     LARGE_INTEGER frequency;
     LARGE_INTEGER start;
     LARGE_INTEGER now;
@@ -37,6 +43,7 @@ int init_sdl(color_setter_t set_pixels_color)
     QueryPerformanceCounter(&start);       // Засекаем старт    int frames = 0;
     double fps = 0.0;
     int frames = 0;
+#endif
 
 
     while (running)
@@ -107,7 +114,7 @@ int init_sdl(color_setter_t set_pixels_color)
         SDL_LockTexture(texture, NULL, &pixels, &pitch);
         set_pixels_color((int*) pixels, X_center, Y_center, scale);
         SDL_UnlockTexture(texture);
-
+#ifdef _WIN32
         frames++;
         QueryPerformanceCounter(&now);
         double elapsed_time = (double)(now.QuadPart - start.QuadPart) / frequency.QuadPart;
@@ -119,6 +126,7 @@ int init_sdl(color_setter_t set_pixels_color)
             frames = 0;
             QueryPerformanceCounter(&start); // Сброс таймера
         }
+#endif
 
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, NULL, NULL);

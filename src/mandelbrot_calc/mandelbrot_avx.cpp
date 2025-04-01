@@ -129,7 +129,8 @@ void fill_pixels_SIMD_manual(int* pixels, double x_center, double y_center, doub
 
     return ;
 }
-/* 
+
+#ifndef _WIN32
 // Real avx
 void fill_pixels_SIMD(int* pixels, double x_center, double y_center, double scale)    // single instruction multiple data
 {
@@ -177,7 +178,7 @@ void fill_pixels_SIMD(int* pixels, double x_center, double y_center, double scal
 
     printf("Finished calc\n");
 
-    return OK;
+    return ;
 }
 
 
@@ -234,6 +235,6 @@ void fill_pixels_SIMD_multithread(int* pixels, double x_center, double y_center,
 
     printf("Finished calc, %d\n", omp_get_max_threads());
 
-    return OK;
+    return ;
 }
-*/
+#endif
