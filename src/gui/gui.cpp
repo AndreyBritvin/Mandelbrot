@@ -1,7 +1,10 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL_ttf.h>
+#ifdef _WIN32
+    #include <SDL.h>
+    #include <windows.h>  // Для QueryPerformanceCounter()
+#else
+    #include <SDL2/SDL.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -30,6 +33,18 @@ int init_sdl(color_setter_t set_pixels_color)
     double scale = default_scale;
     double X_center = 0;
     double Y_center = 0;
+    // struct timespec start = {}, now = {};
+
+#ifdef _WIN32
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start;
+    LARGE_INTEGER now;
+    QueryPerformanceFrequency(&frequency); // Получаем частоту таймера (обычно 10M+)
+    QueryPerformanceCounter(&start);       // Засекаем старт    int frames = 0;
+    double fps = 0.0;
+    int frames = 0;
+#endif
+
 
     while (running)
     {
@@ -99,6 +114,19 @@ int init_sdl(color_setter_t set_pixels_color)
         SDL_LockTexture(texture, NULL, &pixels, &pitch);
         set_pixels_color((int*) pixels, X_center, Y_center, scale);
         SDL_UnlockTexture(texture);
+#ifdef _WIN32
+        frames++;
+        QueryPerformanceCounter(&now);
+        double elapsed_time = (double)(now.QuadPart - start.QuadPart) / frequency.QuadPart;
+
+        if (elapsed_time >= 1.0) {
+            fps = frames / elapsed_time;
+            printf("FPS: %.2f\n", fps);
+
+            frames = 0;
+            QueryPerformanceCounter(&start); // Сброс таймера
+        }
+#endif
 
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, NULL, NULL);

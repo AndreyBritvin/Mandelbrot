@@ -1,12 +1,23 @@
 #include "mandelbrot.h"
 #include "gui.h"
-#include <getopt.h>
+#ifndef _WIN32
+    #include <getopt.h>
+#else
+    #include "getopt_win.h"
+#endif
 #include <string.h>
 #include <stdlib.h>
 #include "config.h"
 #include <stdio.h>
+#ifdef _WIN32
+    #include <intrin.h>
+#else
+    #include <x86intrin.h>
+#endif
 
 #define PRINT_ERROR(...) fprintf(stderr, __VA_ARGS__)
+
+extern "C" void fill_pixels_SIMT_GPU(int* pixels, double x_center, double y_center, double scale);
 
 int main(int argc, char *argv[])
 {
@@ -23,8 +34,10 @@ int main(int argc, char *argv[])
     int option_index = 0;
     int c            = 0;
 
-    while ((c = getopt_long(argc, argv, "m:f:t:", long_options, &option_index)) != -1) {
-        switch (c) {
+    while ((c = getopt_long(argc, argv, "m:f:t:", long_options, &option_index)) != -1)
+    {
+        switch (c)
+        {
             case 'm':
                 mode = optarg;
                 break;
@@ -48,7 +61,11 @@ int main(int argc, char *argv[])
 
     if (strcmp(mode, "graphic") == 0)
     {
+#ifdef _WIN32
+        init_sdl(fill_pixels_SIMT_GPU);
+#else
         init_sdl(fill_pixels_SIMD_multithread);
+#endif
     }
     else if (strcmp(mode, "test") == 0)
     {
@@ -59,7 +76,8 @@ int main(int argc, char *argv[])
         }
 
         color_setter_t test_func = NULL;
-
+        bool is_GPU = false;
+        // TODO: make for to loop all instructions and finc_names
         if (strcmp(func_name, "SISD") == 0)
         {
             test_func = fill_pixels_SISD;
@@ -68,6 +86,7 @@ int main(int argc, char *argv[])
         {
             test_func = fill_pixels_SIMD_manual;
         }
+#ifndef _WIN32
         else if (strcmp(func_name, "SIMD") == 0)
         {
             test_func = fill_pixels_SIMD;
@@ -76,6 +95,12 @@ int main(int argc, char *argv[])
         {
             test_func = fill_pixels_SIMD_multithread;
         }
+#endif
+
+        else if (strcmp(func_name, "SIMT_GPU") == 0)
+        {
+            is_GPU = true;
+        }
         else
         {
             PRINT_ERROR("Unknown function name: %s\n", func_name);
@@ -83,10 +108,28 @@ int main(int argc, char *argv[])
         }
 
         int* pixels = (int *) calloc(WIDTH * HEIGHT, sizeof(int));
+
+
+#ifdef _WIN32
+    TIME_MEASURE
+        (
         for (int i = 0; i < test_count; i++)
         {
-            test_func(pixels, 0, 0, default_scale);
+            if (is_GPU)     fill_pixels_SIMT_GPU(pixels, 0, 0, default_scale);
+            else            test_func       (pixels, 0, 0, default_scale);
         }
+        )
+#else
+    TIME_MEASURE
+        (
+        for (int i = 0; i < test_count; i++)
+        {
+            test_func       (pixels, 0, 0, default_scale);
+        }
+        )
+#endif
+
+        free(pixels);
     }
     else
     {
@@ -94,7 +137,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    // init_sdl(fill_pixels_SIMD_multithread);
+    // init_sdl(fill_pixels_SIMT_GPU);
 
     return EXIT_SUCCESS;
 }
