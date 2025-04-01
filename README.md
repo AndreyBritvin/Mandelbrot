@@ -145,4 +145,4 @@
 ## 🎉 Благодарности <a name = "acknowledgement"></a>
 
 - [Деду](https://github.com/ded32)
-- [Ментору](https://github.com/Янезнаюсорри)
+- [Ментору](https://github.com/aidenfmunro)

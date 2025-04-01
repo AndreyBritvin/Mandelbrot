@@ -6,6 +6,7 @@
 #include <immintrin.h>
 #include <xmmintrin.h>
 #include <omp.h>
+#include <math.h>
 
 int generatePixelColor(long long int N)
 {
@@ -14,9 +15,12 @@ int generatePixelColor(long long int N)
         return BLACK_COLOR_RGBA; // black
     }
     // if (N>250) printf("N = %d\n", N);
-    short r = (N * 100) % 255;
-    short g = (N * 10 % 2) * 255;
-    short b = (N * 10) % 255 * 128;
+    // short r = (N % 9 * 100) % 255;
+    // short g = (N * 10 % 2) * 255;
+    // short b = (N * 10) % 255 * 128;
+    short r = (short)(255 * pow(sin(0.16 * N), 2));
+    short g = (short)(255 * pow(log(log(0.16 * N + 2)), 2));
+    short b = (short)(255 * pow(log(0.16 * N + 4), 2));
     return (r << 24) | (g << 16) | (b << 8) | 255;  // Формат RGBA
 }
 
