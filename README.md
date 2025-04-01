@@ -67,13 +67,13 @@
 #### Флаги компиляторов:
 ##### Для Windows
 ###### cl.exe
-```blabla1```
+```/O2 /D_DEBUG /D_EJUDGE_CLIENT_SIDE /W3 /EHsc /MT /GL```
 ###### nvcc
-```blabla2```
+```-arch=sm_86 -O3```
 
 ##### Для Linux
 ###### g++
-```blabla3```
+```-O3 -mavx2 -fopenmp```
 
 ### Производительность вычислений на CPU и GPU
 
