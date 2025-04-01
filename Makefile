@@ -15,14 +15,14 @@
 # SRC_FILES     = $(wildcard src/*.cpp) $(wildcard src/gui/*.cpp) $(wildcard src/mandelbrot_calc/*.cpp)
 # BUILD_FILES   = $(wildcard build/*.o)
 
-# MY_LIBS = My_logging_system/log_lib.a -L$(SDL_PATH)/lib -L$(CUDA_PATH)/lib/x64 -lmingw32 -lSDL2main -lSDL2 
+# MY_LIBS = My_logging_system/log_lib.a -L$(SDL_PATH)/lib -L$(CUDA_PATH)/lib/x64 -lmingw32 -lSDL2main -lSDL2
 
 # all: mandelbrot.exe
 
 # mandelbrot.exe:$(SRC_FILES) $(BUILD_FILES) src/mandelbrot_calc/mandelbrot.cu
-# 	nvcc -c src/mandelbrot_calc/mandelbrot.cu -o mandelbrot_cu.o -arch=sm_86 $(INCLUDE) 	 
+# 	nvcc -c src/mandelbrot_calc/mandelbrot.cu -o mandelbrot_cu.o -arch=sm_86 $(INCLUDE)
 # 	@$(CC) $(INCLUDE) $(SRC_FILES) $(MY_LIBS) -fno-stack-protector mandelbrot_cu.o -o mandelbrot.exe -lcudart -lcudadevrt -lcuda -lcublas /O2 /D_DEBUG /D_EJUDGE_CLIENT_SIDE /W3 /EHsc /MT
-# #-fopenmp 
+# #-fopenmp
 
 # # @$(CC) $(CFLAGS) $(INCLUDE) $(SRC_FILES) $(MY_LIBS) mandelbrot_cu.o -O3 -fopenmp -o mandelbrot.exe -lcudart -lcudadevrt
 
@@ -73,7 +73,7 @@ all: mandelbrot.exe
 
 # Компиляция с использованием nvcc для .cu файлов
 mandelbrot_cu.obj: src/mandelbrot_calc/mandelbrot.cu
-	nvcc -c src/mandelbrot_calc/mandelbrot.cu -o mandelbrot_cu.obj -arch=sm_86 $(INCLUDE) -O3 
+	nvcc -c src/mandelbrot_calc/mandelbrot.cu -o mandelbrot_cu.obj -arch=sm_86 $(INCLUDE) -O3
 
 # Линковка отдельно через link.exe
 mandelbrot.exe: $(OBJ_FILES) mandelbrot_cu.obj

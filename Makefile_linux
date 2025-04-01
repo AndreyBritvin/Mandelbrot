@@ -26,4 +26,4 @@ clean:
 	rm mandelbrot.out
 
 count_time:
-	./mandelbrot.out --mode=test --func=SIMDT_CPU --test_count=1000
+	./mandelbrot.out --mode=test --func=SIMD --test_count=1000
