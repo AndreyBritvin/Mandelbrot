@@ -10,7 +10,7 @@
 
 int generatePixelColor(long long int N)
 {
-    if (N == 255)
+    if (N == N_EXIT_COUNT)
     {
         return BLACK_COLOR_RGBA; // black
     }

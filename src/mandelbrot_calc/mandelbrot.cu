@@ -82,7 +82,7 @@ __global__ void mandelbrot_kernel(int* pixels, double x_center, double y_center,
     }
     // double x0 = x_center / height + (idx / height - width  / 2) * scale;
     // double y0 = y_center / height + (idy / height - height / 2) * scale;
-    double y0 = y_center / HEIGHT - scale / 2 + dy * idy;
+    double y0 = y_center / HEIGHT - scale / (1920 / 1080) + dy * idy;
     double x0 = x_center / WIDTH  - scale / 2 + dx * idx;
 
     int N_count = 0;
