@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
         for (int i = 0; i < test_count; i++)
         {
             if (is_GPU)     fill_pixels_SIMT_GPU(pixels, 0, 0, default_scale);
-            else            test_func       (pixels, 0, 0, default_scale);
+            else            test_func           (pixels, 0, 0, default_scale);
         }
         )
 #else

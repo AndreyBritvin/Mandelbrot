@@ -58,7 +58,7 @@ LIBS =   SDL2.lib SDL2main.lib  "C:/Program Files/NVIDIA GPU Computing Toolkit/C
 
 
 # Флаги компиляции
-CFLAGS = /O2 /D_DEBUG /D_EJUDGE_CLIENT_SIDE /W3 /EHsc /MT /GL
+CFLAGS = /O2 /GL
 
 # Исходные файлы
 SRC_FILES = $(wildcard src/*.cpp) $(wildcard src/gui/*.cpp) $(wildcard src/mandelbrot_calc/*.cpp)
