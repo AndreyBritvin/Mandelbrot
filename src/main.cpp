@@ -11,12 +11,14 @@
 #include <stdio.h>
 #ifdef _WIN32
     #include <intrin.h>
+    #include <cuda_runtime.h>
 #else
     #include <x86intrin.h>
 #endif
 
 #define PRINT_ERROR(...) fprintf(stderr, __VA_ARGS__)
 
+extern "C" void fill_pixels_SIMT_GPU_no_malloc(int* pixels, int* vram_pixels, double x_center, double y_center, double scale);
 extern "C" void fill_pixels_SIMT_GPU(int* pixels, double x_center, double y_center, double scale);
 
 int main(int argc, char *argv[])
@@ -111,14 +113,28 @@ int main(int argc, char *argv[])
 
 
 #ifdef _WIN32
+        cudaError_t err = {};
+        // Выделение памяти на устройстве
+        int* d_pixels = NULL;
+        if (is_GPU)
+        {
+            err = cudaMalloc((void**)&d_pixels, WIDTH * HEIGHT * sizeof(int));
+            if (err != cudaSuccess)
+            {
+                printf("CUDA malloc failed: %s\n", cudaGetErrorString(err));
+                return EXIT_FAILURE;
+            }
+        }
     TIME_MEASURE
         (
         for (int i = 0; i < test_count; i++)
         {
-            if (is_GPU)     fill_pixels_SIMT_GPU(pixels, 0, 0, default_scale);
-            else            test_func           (pixels, 0, 0, default_scale);
+            if (is_GPU)     fill_pixels_SIMT_GPU_no_malloc(pixels, d_pixels, 0, 0, default_scale);
+            else            test_func                     (pixels,           0, 0, default_scale);
         }
         )
+
+        if (is_GPU) cudaFree(d_pixels);
 #else
     TIME_MEASURE
         (

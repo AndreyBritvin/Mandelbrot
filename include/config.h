@@ -1,7 +1,7 @@
 #ifndef CONFIG_H__
 #define CONFIG_H__
 
-typedef float mandel_t;
+typedef double mandel_t;
 
 const int WIDTH = 800;
 const int HEIGHT = 600;

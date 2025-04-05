@@ -69,7 +69,7 @@ all: mandelbrot.exe
 
 # Компиляция всех C++ файлов
 %.obj: %.cpp
-	$(CC) $(CFLAGS) $(INCLUDE) /c $< /Fo$@
+	$(CC) $(CFLAGS) $(INCLUDE) /c $< /Fo$@ -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\include"
 
 # Компиляция с использованием nvcc для .cu файлов
 mandelbrot_cu.obj: src/mandelbrot_calc/mandelbrot.cu
@@ -91,5 +91,5 @@ clean:
 	rm mandelbrot.exe
 
 count_time:
-	./mandelbrot.exe --mode=test --func=SIMT_GPU --test_count=10000
+	./mandelbrot.exe --mode=test --func=SIMT_GPU --test_count=1000000
 

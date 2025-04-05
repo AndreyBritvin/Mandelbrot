@@ -70,11 +70,69 @@ __global__ void fill_pixels_SIMT(int* pixels, double x_center, double y_center, 
 
     return;
 }*/
+
+__global__ void __launch_bounds__(1024, 64) mandelbrot_kernel_naive(int* pixels, mandel_t x_center, mandel_t y_center, mandel_t scale) 
+{
+    int idx = threadIdx.x + blockIdx.x * blockDim.x;
+    int idy = threadIdx.y + blockIdx.y * blockDim.y;
+    
+    mandel_t dx = (mandel_t) 1 / WIDTH * scale;
+    mandel_t dy = (mandel_t) 1 / WIDTH * scale;
+
+    if (idy >= HEIGHT || idx >= WIDTH)
+    {
+        return;
+    }
+    // double x0 = x_center / height + (idx / height - width  / 2) * scale;
+    // double y0 = y_center / height + (idy / height - height / 2) * scale;
+    mandel_t y0 = y_center / HEIGHT - scale / (WIDTH / HEIGHT) + dy * idy;
+    mandel_t x0 = x_center / WIDTH  - scale / 2 + dx * idx;
+
+    int N_count = 0;
+    mandel_t X = x0, 
+           Y = y0;
+    mandel_t R_square_max = 10;
+
+    while (N_count < N_EXIT_COUNT) 
+    {
+        mandel_t X_square = X * X;
+        mandel_t Y_square = Y * Y;
+        mandel_t XY = X * Y;
+        mandel_t R_square = X_square + Y_square;
+
+        if (R_square > R_square_max) 
+        {
+            // printf("Exit ThrX = %3d, ThrY= %3d, BlX = %3d, BlY = %3d N_count = %3d\n"
+            //      "-------begin-------\n"
+            //     "x_screen = %d\n"
+            //     "y_screen = %d\n"
+            //     "X0 = %lf\n"
+            //     "Y0 = %lf\n"
+            //     "X  = %lf\n"
+            //     "Y  = %lf\n"
+            //     "N_count = %d\n"
+            //     "--------end----\n\n",  threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, N_count,
+            //     idx, idy, x0, y0, X, Y, N_count);
+            break;
+        }
+
+        N_count++;
+        X = X_square - Y_square + x0;
+        Y = 2 * XY + y0;
+    }
+
+    pixels[idy * WIDTH + idx] = generatePixelColor_cuda(N_count);
+    // printf("ThrX = %3d, ThrY= %3d, BlX = %3d, BlY = %3d N_count = %3d\n",  threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, N_count);
+    return;
+}
+
+const int TILE_X = 16;
+const int TILE_Y = 16;
 // __launch_bounds__(1024, 16) - incresed fps at full black screen (it almost same)
 __global__ void __launch_bounds__(1024, 16) mandelbrot_kernel(int* pixels, mandel_t x_center, mandel_t y_center, mandel_t scale)
 {
-    int base_x = (threadIdx.x + blockIdx.x * blockDim.x) * 4;
-    int base_y = (threadIdx.y + blockIdx.y * blockDim.y) * 4;
+    int base_x = (threadIdx.x + blockIdx.x * blockDim.x) * TILE_X;
+    int base_y = (threadIdx.y + blockIdx.y * blockDim.y) * TILE_Y;
 
     mandel_t dx = (mandel_t) 1 / WIDTH * scale;
     mandel_t dy = (mandel_t) 1 / WIDTH * scale;
@@ -82,9 +140,9 @@ __global__ void __launch_bounds__(1024, 16) mandelbrot_kernel(int* pixels, mande
     // double x0 = x_center / height + (idx / height - width  / 2) * scale;
     // double y0 = y_center / height + (idy / height - height / 2) * scale;
     // double y0 = y_center / HEIGHT - scale / 2 / ((double)WIDTH / (double)HEIGHT) + dy * idy;
-    for (int y_screen = 0; y_screen < 4; y_screen++, y_screen++)
+    for (int y_screen = 0; y_screen < TILE_Y; y_screen++)
     {
-        for (int x_screen = 0; x_screen < 4; x_screen++)
+        for (int x_screen = 0; x_screen < TILE_X; x_screen++)
         {
             int idx = base_x + x_screen;
             int idy = base_y + y_screen;     
@@ -97,7 +155,7 @@ __global__ void __launch_bounds__(1024, 16) mandelbrot_kernel(int* pixels, mande
 
             int N_count = 0;
             mandel_t X = x0,
-                    Y = y0;
+                     Y = y0;
             mandel_t R_square_max = 10;
 
             while (N_count < N_EXIT_COUNT)
@@ -109,17 +167,6 @@ __global__ void __launch_bounds__(1024, 16) mandelbrot_kernel(int* pixels, mande
 
                 if (R_square > R_square_max)
                 {
-                    // printf("Exit ThrX = %3d, ThrY= %3d, BlX = %3d, BlY = %3d N_count = %3d\n"
-                    //      "-------begin-------\n"
-                    //     "x_screen = %d\n"
-                    //     "y_screen = %d\n"
-                    //     "X0 = %lf\n"
-                    //     "Y0 = %lf\n"
-                    //     "X  = %lf\n"
-                    //     "Y  = %lf\n"
-                    //     "N_count = %d\n"
-                    //     "--------end----\n\n",  threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, N_count,
-                    //     idx, idy, x0, y0, X, Y, N_count);
                     break;
                 }
 
@@ -131,9 +178,36 @@ __global__ void __launch_bounds__(1024, 16) mandelbrot_kernel(int* pixels, mande
             pixels[idy * WIDTH + idx] = generatePixelColor_cuda(N_count);
         }
     }
-    // printf("ThrX = %3d, ThrY= %3d, BlX = %3d, BlY = %3d N_count = %3d\n",  threadIdx.x, threadIdx.y, blockIdx.x, blockIdx.y, N_count);
+
+    return;
+} 
+
+extern "C"
+__host__ void fill_pixels_SIMT_GPU_no_malloc(int* pixels, int* vram_pixels, double x_center, double y_center, double scale)
+{
+    int *d_pixels = vram_pixels;
+
+    size_t size = WIDTH * HEIGHT * sizeof(int);
+    cudaError_t err = {};
+
+    dim3 blockDim(16, 16);  // Размер блока
+
+    dim3 gridDim((WIDTH  + TILE_X * blockDim.x - 1) / (TILE_X * blockDim.x),
+                 (HEIGHT + TILE_Y * blockDim.y - 1) / (TILE_Y * blockDim.y)); // loop unrolled
+    // mandelbrot_kernel<<<gridDim, blockDim>>>(d_pixels, (mandel_t) x_center, (mandel_t) y_center, (mandel_t) scale);
+
+    // dim3 gridDim((WIDTH + blockDim.x - 1) / blockDim.x, (HEIGHT + blockDim.y - 1) / blockDim.y);  // for naive
+    mandelbrot_kernel_naive<<<gridDim, blockDim>>>(d_pixels, (mandel_t) x_center, (mandel_t) y_center, (mandel_t) scale);
+
+    err = cudaGetLastError();
+    if (err != cudaSuccess)
+    {
+        printf("CUDA kernel launch failed: %s\n", cudaGetErrorString(err));
+    }
+
     return;
 }
+
 
 extern "C"
 __host__ void fill_pixels_SIMT_GPU(int* pixels, double x_center, double y_center, double scale)
@@ -151,7 +225,6 @@ __host__ void fill_pixels_SIMT_GPU(int* pixels, double x_center, double y_center
     {
         printf("CUDA malloc failed: %s\n", cudaGetErrorString(err));
     }
-
     // Запуск ядра
     // 2 файла с прозрачностью
     // Alpha blending = сложение двух файлов (кошка + теннисный стол)
@@ -159,9 +232,9 @@ __host__ void fill_pixels_SIMT_GPU(int* pixels, double x_center, double y_center
     // *через микрофон спектр = раскраска. TXWave. Рисовка эквалайзера, затем мб рисовка палитры в зависимости от звука
     //  из-за FFT (синусы не пересчитывает + интерполяция).
 
-    dim3 blockDim(32, 32);  // Размер блока
-    dim3 gridDim((WIDTH  + 4 * blockDim.x - 1) / (4 * blockDim.x),
-                 (HEIGHT + 4 * blockDim.y - 1) / (4 * blockDim.y));
+    dim3 blockDim(16, 16);  // Размер блока
+    dim3 gridDim((WIDTH  + TILE_X * blockDim.x - 1) / (TILE_X * blockDim.x),
+                 (HEIGHT + TILE_Y * blockDim.y - 1) / (TILE_Y * blockDim.y));
     // TIME_MEASURE(
     mandelbrot_kernel<<<gridDim, blockDim>>>(d_pixels, (mandel_t) x_center, (mandel_t) y_center, (mandel_t) scale);
     // )
@@ -176,7 +249,6 @@ __host__ void fill_pixels_SIMT_GPU(int* pixels, double x_center, double y_center
     {
         printf("CUDA memcpy failed: %s\n", cudaGetErrorString(err));
     }
-
     cudaFree(d_pixels);
 
     return;
