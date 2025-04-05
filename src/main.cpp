@@ -18,8 +18,8 @@
 
 #define PRINT_ERROR(...) fprintf(stderr, __VA_ARGS__)
 
-extern "C" void fill_pixels_SIMT_GPU_no_malloc(int* pixels, int* vram_pixels, double x_center, double y_center, double scale);
-extern "C" void fill_pixels_SIMT_GPU(int* pixels, double x_center, double y_center, double scale);
+extern "C" void fill_pixels_SIMT_GPU_no_malloc(int* pixels, int* vram_pixels, mandel_t x_center, mandel_t y_center, mandel_t scale);
+extern "C" void fill_pixels_SIMT_GPU(int* pixels, mandel_t x_center, mandel_t y_center, mandel_t scale);
 
 int main(int argc, char *argv[])
 {
@@ -130,6 +130,7 @@ int main(int argc, char *argv[])
         for (int i = 0; i < test_count; i++)
         {
             if (is_GPU)     fill_pixels_SIMT_GPU_no_malloc(pixels, d_pixels, 0, 0, default_scale);
+            // if (is_GPU)     fill_pixels_SIMT_GPU(pixels, 0, 0, default_scale);
             else            test_func                     (pixels,           0, 0, default_scale);
         }
         )

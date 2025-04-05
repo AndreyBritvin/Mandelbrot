@@ -91,5 +91,5 @@ clean:
 	rm mandelbrot.exe
 
 count_time:
-	./mandelbrot.exe --mode=test --func=SIMT_GPU --test_count=1000000
+	./mandelbrot.exe --mode=test --func=SISD --test_count=100
 

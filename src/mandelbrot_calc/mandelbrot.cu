@@ -173,7 +173,7 @@ __global__ void __launch_bounds__(1024, 16) mandelbrot_kernel(int* pixels, mande
                 N_count++;
                 X = X_square - Y_square + x0;
                 Y = 2 * XY + y0;
-            }
+            } 
 
             pixels[idy * WIDTH + idx] = generatePixelColor_cuda(N_count);
         }
@@ -236,7 +236,7 @@ __host__ void fill_pixels_SIMT_GPU(int* pixels, double x_center, double y_center
     dim3 gridDim((WIDTH  + TILE_X * blockDim.x - 1) / (TILE_X * blockDim.x),
                  (HEIGHT + TILE_Y * blockDim.y - 1) / (TILE_Y * blockDim.y));
     // TIME_MEASURE(
-    mandelbrot_kernel<<<gridDim, blockDim>>>(d_pixels, (mandel_t) x_center, (mandel_t) y_center, (mandel_t) scale);
+    mandelbrot_kernel_naive<<<gridDim, blockDim>>>(d_pixels, (mandel_t) x_center, (mandel_t) y_center, (mandel_t) scale);
     // )
     err = cudaGetLastError();
     if (err != cudaSuccess)

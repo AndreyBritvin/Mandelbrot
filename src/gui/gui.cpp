@@ -112,7 +112,7 @@ int init_sdl(color_setter_t set_pixels_color)
         }
 
         SDL_LockTexture(texture, NULL, &pixels, &pitch);
-        set_pixels_color((int*) pixels, X_center, Y_center, scale);
+        set_pixels_color((int*) pixels, (mandel_t) X_center, (mandel_t) Y_center, (mandel_t) scale);
         SDL_UnlockTexture(texture);
 #ifdef _WIN32
         frames++;
